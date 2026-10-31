@@ -1,13 +1,12 @@
 package dev.liquidflow.sample
 
 import android.app.Application
-import java.io.File
 
 /**
- * Records the last uncaught exception so the app can show it on the next launch.
+ * Installs a process-wide crash handler.
  *
- * Debugging a crash on a device with no adb access is otherwise guesswork; this makes the stack
- * trace visible on screen, where it can be screenshotted or copied.
+ * Without adb, a crash on a phone is otherwise invisible; this makes the trace readable in the
+ * Downloads folder and on the next launch.
  */
 class LiquidFlowApp : Application() {
 
@@ -15,13 +14,8 @@ class LiquidFlowApp : Application() {
         super.onCreate()
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-            runCatching { crashFile(this).writeText(throwable.stackTraceToString()) }
+            runCatching { saveCrash(this, throwable.stackTraceToString()) }
             previous?.uncaughtException(thread, throwable)
         }
     }
-}
-
-internal fun crashFile(app: android.content.Context): File {
-    val dir = app.getExternalFilesDir(null) ?: app.filesDir
-    return File(dir, "last-crash.txt")
 }
