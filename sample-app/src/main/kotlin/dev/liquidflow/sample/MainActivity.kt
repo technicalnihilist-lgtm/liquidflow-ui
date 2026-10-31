@@ -32,7 +32,9 @@ class MainActivity : ComponentActivity() {
         LiquidFlow.attach(this)
 
         setContent {
-            LiquidFlowRoot()
+            CrashGate {
+                LiquidFlowRoot()
+            }
         }
     }
 
