@@ -10,8 +10,8 @@ import androidx.compose.ui.platform.LocalContext
 /**
  * Shows the last crash report before the app starts, when one exists.
  *
- * Wrapping the whole app in this keeps the crash path independent of the theme, the glass layers and
- * the framework itself: if any of those threw, this screen still renders.
+ * Deliberately outside the theme and the glass layers: if any of those threw, this screen still
+ * renders.
  */
 @Composable
 fun CrashGate(content: @Composable () -> Unit) {
