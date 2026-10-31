@@ -11,8 +11,8 @@ import dev.liquidflow.core.RenderingProfile
 /**
  * Single activity host for the sample application.
  *
- * Initialization happens before the first composition so that no component ever composes against
- * the fallback profile. [LiquidFlow.attach] ties animation pausing to this activity's lifecycle.
+ * If the previous launch crashed, the framework starts in safe mode (LITE profile, glass and
+ * animation disabled) so the app can still be used while the crash report is shown.
  */
 class MainActivity : ComponentActivity() {
 
@@ -20,16 +20,28 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        LiquidFlow.initialize(
-            context = applicationContext,
-            config = LiquidFlowConfig {
+        val crashedLastTime = readCrash(this) != null
+        val config = if (crashedLastTime) {
+            LiquidFlowConfig {
+                renderingProfile = RenderingProfile.LITE
+                glassEnabled = false
+                animationsEnabled = false
+            }
+        } else {
+            LiquidFlowConfig {
                 renderingProfile = RenderingProfile.AUTO
                 glassEnabled = true
                 animationsEnabled = true
                 reducedMotion = false
-            },
-        )
-        LiquidFlow.attach(this)
+            }
+        }
+
+        try {
+            LiquidFlow.initialize(context = applicationContext, config = config)
+            LiquidFlow.attach(this)
+        } catch (t: Throwable) {
+            saveCrash(this, "initialize failed:\n\n" + t.stackTraceToString())
+        }
 
         setContent {
             CrashGate {
@@ -40,7 +52,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Only detach when the activity is really going away, not on configuration change.
         if (isFinishing) LiquidFlow.detach()
     }
 }
