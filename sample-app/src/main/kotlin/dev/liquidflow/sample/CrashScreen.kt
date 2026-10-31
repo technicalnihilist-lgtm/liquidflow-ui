@@ -1,11 +1,7 @@
 package dev.liquidflow.sample
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,16 +17,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-internal fun readCrash(context: Context): String? {
-    val file = crashFile(context)
-    if (!file.exists()) return null
-    return runCatching { file.readText().takeIf { it.isNotBlank() } }.getOrNull()
-}
-
-internal fun clearCrash(context: Context) {
-    runCatching { crashFile(context).delete() }
-}
-
 /** Full-screen crash report, deliberately plain so it cannot itself crash. */
 @Composable
 internal fun CrashScreen(text: String, onContinue: () -> Unit) {
@@ -39,14 +25,12 @@ internal fun CrashScreen(text: String, onContinue: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            Text("LiquidFlow crashed last time", style = MaterialTheme.typography.titleMedium)
             Text(
-                text = "LiquidFlow crashed last time",
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(
-                text = "Screenshot this and send it. Tap Continue to open the app anyway.",
+                "Same text is saved as liquidflow-crash.txt in your Downloads folder. " +
+                    "Screenshot this, or send that file.",
                 style = MaterialTheme.typography.bodySmall,
             )
             Column(
@@ -55,10 +39,10 @@ internal fun CrashScreen(text: String, onContinue: () -> Unit) {
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState()),
             ) {
-                Text(text = text, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+                Text(text = text, fontFamily = FontFamily.Monospace, fontSize = 9.sp)
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = { onContinue() }) { Text("Continue") }
+            Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
+                Text("Continue in safe mode")
             }
         }
     }
