@@ -30,11 +30,11 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
 
       - name: Build debug APK
-        run: |
-          chmod +x gradlew
-          ./gradlew :sample-app:assembleDebug --stacktrace
+        run: gradle :sample-app:assembleDebug --stacktrace --no-daemon
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -47,5 +47,5 @@ jobs:
         with:
           tag_name: v1.0.0-apk
           name: LiquidFlow UI demo APK
-          body: Debug APK built by CI from the sample application.
+          body: Debug APK built by CI from the sample application (start screen, Android stage, demo).
           files: sample-app/build/outputs/apk/debug/*.apk
